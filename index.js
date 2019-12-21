@@ -63,4 +63,3 @@ async function detectRedirect(link) {
 
     return result;
 }
-detectRedirect('http://google.com');
