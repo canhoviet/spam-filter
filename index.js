@@ -1,6 +1,11 @@
 const rp = require('request-promise');
 
-const { getAllUrls, extractHostname, REF_REGEX } = require('./utils');
+const {
+    getAllUrls,
+    extractHostname,
+    REF_REGEX,
+    findCommonElements
+} = require('./utils');
 
 /**
  *
@@ -22,10 +27,18 @@ exports.isSpam = function isSpam(
     return result;
 };
 
-function check(links = [], spamLinkDomains = [], redirectionDepth = 1) {
+async function check(links = [], spamLinkDomains = [], redirectionDepth = 1) {
     if (redirectionDepth === 0) {
         // check
+        return findCommonElements(links.map(extractHostname), spamLinkDomains);
     } else {
+        const links = await Promise.all(links.map(detectRedirect));
+        const uniqueLinks = new Set(links);
+        return check(
+            Array.from(uniqueLinks),
+            spamLinkDomains,
+            redirectionDepth - 1
+        );
     }
 }
 
@@ -44,5 +57,3 @@ async function detectRedirect(link) {
     }
     return result;
 }
-
-detectRedirect('http://www.google.com/').then(console.log);

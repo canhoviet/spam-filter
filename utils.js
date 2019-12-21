@@ -24,4 +24,8 @@ exports.extractHostname = function extractHostname(url) {
 
     return hostname;
 };
+
+exports.findCommonElements = function findCommonElements(arr1, arr2) {
+    return arr1.some(item => arr2.includes(item));
+};
 exports.REF_REGEX = REF_REGEX;
