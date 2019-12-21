@@ -44,16 +44,23 @@ async function check(links = [], spamLinkDomains = [], redirectionDepth = 1) {
 
 async function detectRedirect(link) {
     let result = [];
-    const resp = await rp({
-        uri: link,
-        redirect: 'manual',
-        resolveWithFullResponse: true
-    });
-    const statusCode = resp.statusCode;
-    if (statusCode === 301) {
-        result.push(resp.headers.get('location'));
-    } else if (statusCode >= 200 && statusCode < 300) {
-        result = result.concat(getAllUrls(resp.body, REF_REGEX));
+    let resp;
+    try {
+        resp = await rp({
+            uri: link,
+            followRedirect: false,
+            resolveWithFullResponse: true
+        });
+        const statusCode = resp.statusCode;
+        if (statusCode >= 200 && statusCode < 300) {
+            result = result.concat(getAllUrls(resp.body, REF_REGEX));
+        }
+    } catch (e) {
+        if (e.statusCode === 301) {
+            result.push(e.response.headers.location);
+        }
     }
+
     return result;
 }
+detectRedirect('http://google.com');
